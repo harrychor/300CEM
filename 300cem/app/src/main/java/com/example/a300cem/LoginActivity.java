@@ -72,7 +72,11 @@ public class LoginActivity extends AppCompatActivity {
 
     private void messageloginsuccess() {
         new AlertDialog.Builder(LoginActivity.this)
+<<<<<<< Updated upstream
                 .setTitle(String.valueOf(R.string.login_successful))
+=======
+                .setTitle(R.string.login_successful)
+>>>>>>> Stashed changes
                 .setPositiveButton(R.string.cancel, null)
                 .show();
 
@@ -80,8 +84,13 @@ public class LoginActivity extends AppCompatActivity {
 
     private void messageloginfail() {
         new AlertDialog.Builder(LoginActivity.this)
+<<<<<<< Updated upstream
                 .setTitle(String.valueOf(R.string.login_failed))
                 .setMessage(String.valueOf(R.string.login_fail_massage))
+=======
+                .setTitle(R.string.login_failed)
+                .setMessage(R.string.login_fail_massage)
+>>>>>>> Stashed changes
                 .setPositiveButton(R.string.cancel, null)
                 .show();
     }
