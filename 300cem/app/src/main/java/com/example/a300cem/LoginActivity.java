@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -25,7 +26,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Switch;
 
+import java.util.Locale;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -54,9 +57,9 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     public void login(View v){
-        String email = ((EditText)findViewById(R.id.email))
+        final String email = ((EditText)findViewById(R.id.email))
                 .getText().toString();
-        String password = ((EditText)findViewById(R.id.password))
+        final String password = ((EditText)findViewById(R.id.password))
                 .getText().toString();
         Log.d("AUTH", email+"/"+password);
 
@@ -68,7 +71,38 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("onComplete", String.valueOf(R.string.login_failed));
                             messageloginfail();
                         } else {
-                            messageloginsuccess();
+                            saveuserpw(email,password);
+                            tomainpage();
+                        }
+                    }
+                });
+    }
+    public void  saveuserpw(String username, String Password){
+        SharedPreferences setting = getSharedPreferences("atm",MODE_PRIVATE);
+        setting.edit().putString("PREF_USERID", username).commit();
+        setting.edit().putString("PREF_Password", Password).commit();
+    }
+
+    public void getuserpw(){
+        EditText email = findViewById(R.id.email);
+        EditText password = findViewById(R.id.password);
+        SharedPreferences setting = getSharedPreferences("atm",MODE_PRIVATE);
+        email.setText(setting.getString("PREF_USERID", ""));
+        //password.setText(setting.getString("PREF_Password", ""));
+            }
+
+    public void autologin(){
+        SharedPreferences setting = getSharedPreferences("atm",MODE_PRIVATE);
+        String email=setting.getString("PREF_USERID", "");
+        String password=setting.getString("PREF_Password", "");
+        auth.signInWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (!task.isSuccessful()){
+                            Log.d("onComplete", String.valueOf(R.string.login_failed));
+                            messageloginfail();
+                        } else {
                             tomainpage();
                         }
                     }
@@ -149,6 +183,9 @@ public class LoginActivity extends AppCompatActivity {
         final Button loginButton = findViewById(R.id.loginbutton);
         final ImageButton AuthenticationButton = findViewById(R.id.FingerAuthentication);
 
+
+
+
         getLoginFormState().observe(this, new Observer<LoginFormState>() {
             @Override
             public void onChanged(LoginFormState loginFormState) {
@@ -201,6 +238,7 @@ public class LoginActivity extends AppCompatActivity {
             public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
                 super.onAuthenticationSucceeded(result);
                 Log.d(TAG, "Fingerprint recognised successfully");
+                autologin();
             }
             @Override
             public void onAuthenticationFailed() {
@@ -230,7 +268,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("onAuthStateChanged", "Login:" +
                             user.getUid());
                     userUID = user.getUid();
-                    tomainpage();
+                    getuserpw();
                 } else {
                     Log.d("onAuthStateChanged", "LogOut");
                 }
