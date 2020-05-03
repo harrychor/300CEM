@@ -40,6 +40,7 @@ public class LoginActivity extends AppCompatActivity {
     }
     private static final String TAG = LoginActivity.class.getName();
 
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -68,13 +69,16 @@ public class LoginActivity extends AppCompatActivity {
                             messageloginfail();
                         } else {
                             messageloginsuccess();
-                            Intent intent = new Intent();
-                            intent.setClass(LoginActivity.this, MainActivity.class);
-                            startActivity(intent);
-                            finish();
+                            tomainpage();
                         }
                     }
                 });
+    }
+    public void tomainpage(){
+        Intent intent = new Intent();
+        intent.setClass(LoginActivity.this, MainActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void messageloginsuccess() {
@@ -178,18 +182,13 @@ public class LoginActivity extends AppCompatActivity {
         };
         checkusername.addTextChangedListener(afterTextChangedListener);
         checkpassword.addTextChangedListener(afterTextChangedListener);
-        //Assign an onClickListener to the app’s “Authentication” button//
 
 
-//Create a thread pool with a single thread//
         Executor newExecutor = Executors.newSingleThreadExecutor();
         FragmentActivity activity = this;
 
-//Start listening for authentication events//
-
         final BiometricPrompt myBiometricPrompt = new BiometricPrompt(activity, newExecutor, new BiometricPrompt.AuthenticationCallback() {
             @Override
-//onAuthenticationError is called when a fatal error occurrs//
             public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                 super.onAuthenticationError(errorCode, errString);
                 if (errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON) {
@@ -203,20 +202,16 @@ public class LoginActivity extends AppCompatActivity {
                 super.onAuthenticationSucceeded(result);
                 Log.d(TAG, "Fingerprint recognised successfully");
             }
-            //onAuthenticationFailed is called when the fingerprint doesn’t match//
             @Override
             public void onAuthenticationFailed() {
                 super.onAuthenticationFailed();
-//Print a message to Logcat//
                 Log.d(TAG, "Fingerprint not recognised");
             }
         });
-//Create the BiometricPrompt instance//
         final BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
                 .setTitle("Login with your Fingerprint")
                 .setNegativeButtonText("Cancel")
                 .build();
-//Assign an onClickListener to the app’s “Authentication” button//
         AuthenticationButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -232,11 +227,12 @@ public class LoginActivity extends AppCompatActivity {
                     @NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    Log.d("onAuthStateChanged", "登入:" +
+                    Log.d("onAuthStateChanged", "Login:" +
                             user.getUid());
                     userUID = user.getUid();
+                    tomainpage();
                 } else {
-                    Log.d("onAuthStateChanged", "已登出");
+                    Log.d("onAuthStateChanged", "LogOut");
                 }
             }
         };
