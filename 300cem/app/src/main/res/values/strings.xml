@@ -11,4 +11,5 @@
     <string name="Password">Password</string>
     <string name="email">Email or Username</string>
     <string name="logout">Logout</string>
+    <string name="hello">Hello</string>
 </resources>
