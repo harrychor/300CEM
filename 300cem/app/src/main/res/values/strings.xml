@@ -16,4 +16,5 @@
     <string name="error">error</string>
     <string name="fingerprintsave">would you like to use fingerprint to login</string>
     <string name="ok">ok</string>
+    <string name="TakeAttendance">Take Attendance</string>
 </resources>

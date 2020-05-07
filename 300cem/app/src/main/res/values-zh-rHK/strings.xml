@@ -16,4 +16,5 @@
     <string name="error">錯誤</string>
     <string name="fingerprintsave">您想建立指紋來登錄嗎</string>
     <string name="ok">是</string>
+    <string name="TakeAttendance">進行點名</string>
 </resources>
