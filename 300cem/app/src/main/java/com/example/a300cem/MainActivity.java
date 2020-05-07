@@ -2,6 +2,8 @@ package com.example.a300cem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -9,7 +11,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.PostProcessor;
 import android.os.Bundle;
 
@@ -19,6 +25,7 @@ import android.view.View;
 import android.widget.Button;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 
 import com.google.firebase.database.DataSnapshot;
@@ -36,6 +43,8 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 import java.util.Collection;
 import java.util.jar.Attributes;
@@ -44,8 +53,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     FirebaseAuth auth;
     private Button logout;
-
-
+    private Button TakeAttendance;
+    private IntentIntegrator scanIntegrator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,76 +62,36 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final TextView userN = findViewById(R.id.usernamedisplay);
         final String user = auth.getInstance().getCurrentUser().getUid();
+        String lessonID =
+                "bwef5TfoaAOEBRw9LjQNEglidtm1"
+                ;
+
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Log.d(TAG, String.valueOf(db));
-       CollectionReference data = db.collection("UID");
-       DocumentReference documentReference = data.document(user);
-       documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-           @Override
-           public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-               if (task.isSuccessful()) {
-                   DocumentSnapshot document = task.getResult();
-                   if (document.exists()) {
-                       Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                       Log.d(TAG, "DocumentSnapshot data: " + document.getString("name"));
-                       String name = document.getString("name");
-                       userN.setText(name);
-                   } else {
-                       Log.d(TAG, "No such document");
-                   }
-               } else {
-                   Log.d(TAG, "get failed with ", task.getException());
-               }
-           }
-       });
-
-
-       /*Log.d(TAG,"username = " + query.toString());
-     /   userN.setText(query.toString());
-       collectionReference.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-           @Override
-           public void onComplete(@NonNull Task<QuerySnapshot> task) {
-               if(task.isSuccessful()){
-                    for (QueryDocumentSnapshot documentSnapshot : task.getResult()){
-                        Log.d(TAG, String.valueOf(documentSnapshot.getData()));
+        CollectionReference data = db.collection("UID");
+        CollectionReference data2 = db.collection("UID/"+lessonID+"/student");
+        Log.d(TAG, "DocumentSnapshot data: " + data2.getPath());
+        DocumentReference documentReference = data.document(user);
+        documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getString("name"));
+                        String name = document.getString("name");
+                        userN.setText(name);
+                    } else {
+                        Log.d(TAG, "No such document");
                     }
-               }
-           }
-       });
-
-        */
-
-
-        /*
-
-        final DatabaseReference database = FirebaseDatabase.getInstance().getReference("UID");
-        DatabaseReference userdata = database.child(user).child("username");
-        Query test1 = userdata.equalTo(user);
-        Log.d(TAG, "Query = " + test1);
-        Query query = userdata
-                .orderByChild("studentID")
-                .equalTo(user);
-        query.addListenerForSingleValueEvent(valueEventListener);
-
-        ValueEventListener valueEventListener= new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String name = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "username = " + name);
-                userN.setText(name);
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                }
             }
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, "ERROR ");
-            }
+        });
 
-        };
-
-
-
-        Log.d(TAG, "DatabaseReference = "+query.toString());
- */
         logout = (Button) findViewById(R.id.logoutbutton);
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -135,23 +104,43 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        TakeAttendance = (Button) findViewById(R.id.TakeAttendance);
+        TakeAttendance.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scanIntegrator = new IntentIntegrator(MainActivity.this);
+                scanIntegrator.initiateScan();
+            }
+        });
     }
-    /*
-    ValueEventListener valueEventListener= new ValueEventListener() {
-        @Override
-        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-            Name name = dataSnapshot.getValue(Name.class);
-            Log.d(TAG, "username = " + name);
-            //userN.setText(name);
+
+    public void onActivityResult(int requestCode, int resultCode, Intent intent)
+    {
+        IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        if (scanningResult != null)
+        {
+            if(scanningResult.getContents() != null)
+            {
+                String scanContent = scanningResult.getContents();
+                if (scanContent.equals(scanContent))
+                {
+                    Toast.makeText(getApplicationContext(),R.string.success, Toast.LENGTH_LONG).show();
+                }
+            }
         }
-
-        @Override
-        public void onCancelled(@NonNull DatabaseError databaseError) {
-            Log.d(TAG, "ERROR ");
+        else
+        {
+            super.onActivityResult(requestCode, resultCode, intent);
+            Toast.makeText(getApplicationContext(),R.string.error,Toast.LENGTH_LONG).show();
         }
+    }
 
-    };
+    public void getStudentAttendance(String studentID){
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        Log.d(TAG, String.valueOf(db));
+        String lessonID = null;
+        CollectionReference data = db.collection("UID/"+lessonID+"/student");
 
-     */
-
+    }
 }
+

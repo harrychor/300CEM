@@ -12,4 +12,8 @@
     <string name="email">Email or Username</string>
     <string name="logout">Logout</string>
     <string name="hello">Hello</string>
+    <string name="success">success</string>
+    <string name="error">error</string>
+    <string name="fingerprintsave">would you like to use fingerprint to login</string>
+    <string name="ok">ok</string>
 </resources>

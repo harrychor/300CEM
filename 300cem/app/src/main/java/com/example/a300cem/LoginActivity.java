@@ -15,6 +15,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -71,8 +72,9 @@ public class LoginActivity extends AppCompatActivity {
                             Log.d("onComplete", String.valueOf(R.string.login_failed));
                             messageloginfail();
                         } else {
-                            saveuserpw(email,password);
-                            tomainpage();
+                            savefingerprint(email,password);
+                            //saveuserpw(email,password);
+                            //tomainpage();
                         }
                     }
                 });
@@ -121,6 +123,17 @@ public class LoginActivity extends AppCompatActivity {
                 .setPositiveButton(R.string.cancel, null)
                 .show();
 
+    }
+    private void savefingerprint(final String username, final String Password){
+        new AlertDialog.Builder(LoginActivity.this)
+                .setTitle(R.string.fingerprintsave)
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        saveuserpw(username, Password);
+                    }
+                })
+                .show();
     }
 
     private void messageloginfail() {
@@ -268,7 +281,7 @@ public class LoginActivity extends AppCompatActivity {
                     Log.d("onAuthStateChanged", "Login:" +
                             user.getUid());
                     userUID = user.getUid();
-                    getuserpw();
+                    //getuserpw();
                 } else {
                     Log.d("onAuthStateChanged", "LogOut");
                 }
