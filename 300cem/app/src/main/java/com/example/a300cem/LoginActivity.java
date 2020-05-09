@@ -73,8 +73,6 @@ public class LoginActivity extends AppCompatActivity {
                             messageloginfail();
                         } else {
                             savefingerprint(email,password);
-                            //saveuserpw(email,password);
-                            //tomainpage();
                         }
                     }
                 });
@@ -85,13 +83,7 @@ public class LoginActivity extends AppCompatActivity {
         setting.edit().putString("PREF_Password", Password).commit();
     }
 
-    public void getuserpw(){
-        EditText email = findViewById(R.id.email);
-        EditText password = findViewById(R.id.password);
-        SharedPreferences setting = getSharedPreferences("atm",MODE_PRIVATE);
-        email.setText(setting.getString("PREF_USERID", ""));
-        //password.setText(setting.getString("PREF_Password", ""));
-            }
+
 
     public void autologin(){
         SharedPreferences setting = getSharedPreferences("atm",MODE_PRIVATE);
@@ -117,13 +109,6 @@ public class LoginActivity extends AppCompatActivity {
         finish();
     }
 
-    private void messageloginsuccess() {
-        new AlertDialog.Builder(LoginActivity.this)
-                .setTitle(R.string.login_successful)
-                .setPositiveButton(R.string.cancel, null)
-                .show();
-
-    }
     private void savefingerprint(final String username, final String Password){
         new AlertDialog.Builder(LoginActivity.this)
                 .setTitle(R.string.fingerprintsave)

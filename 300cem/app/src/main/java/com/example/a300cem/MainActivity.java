@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -55,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private Button logout;
     private Button TakeAttendance;
     private IntentIntegrator scanIntegrator;
+    String user = auth.getInstance().getCurrentUser().getUid();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,16 +64,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         final TextView userN = findViewById(R.id.usernamedisplay);
         final String user = auth.getInstance().getCurrentUser().getUid();
-        String lessonID =
-                "bwef5TfoaAOEBRw9LjQNEglidtm1"
-                ;
+
 
 
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Log.d(TAG, String.valueOf(db));
         CollectionReference data = db.collection("UID");
-        CollectionReference data2 = db.collection("UID/"+lessonID+"/student");
-        Log.d(TAG, "DocumentSnapshot data: " + data2.getPath());
+
         DocumentReference documentReference = data.document(user);
         documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -113,19 +112,48 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-
+    //QRcode checking
     public void onActivityResult(int requestCode, int resultCode, Intent intent)
     {
         IntentResult scanningResult = IntentIntegrator.parseActivityResult(requestCode, resultCode, intent);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         if (scanningResult != null)
         {
             if(scanningResult.getContents() != null)
             {
                 String scanContent = scanningResult.getContents();
-                if (scanContent.equals(scanContent))
-                {
-                    Toast.makeText(getApplicationContext(),R.string.success, Toast.LENGTH_LONG).show();
-                }
+                String lessonID = scanContent;
+                DocumentReference data2 = db.collection("300CEM Lessons/"+lessonID+"/student/").document(user);
+                //DocumentReference dataREF = data2.document();
+                Log.d(TAG, "DocumentSnapshot data: " + data2);
+                final DocumentReference documentReference = data2;
+
+
+
+                documentReference.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot documentSnapshot = task.getResult();
+                            Log.d(TAG, "DocumentSnapshot data: " + documentSnapshot.getData());
+                            Log.d(TAG, "DocumentSnapshot data: " + documentSnapshot);
+                            if (documentSnapshot.exists()) {
+                                Toast.makeText(getApplicationContext(), R.string.success, Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(),R.string.error,Toast.LENGTH_LONG).show();
+                            }
+                        }else {
+                            Toast.makeText(getApplicationContext(),R.string.error,Toast.LENGTH_LONG).show();
+                        }
+
+                    }
+
+                });
+
+
+
+                Log.d(TAG, "DocumentSnapshot data: " + documentReference.getPath());
+
             }
         }
         else
@@ -135,12 +163,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void getStudentAttendance(String studentID){
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Log.d(TAG, String.valueOf(db));
-        String lessonID = null;
-        CollectionReference data = db.collection("UID/"+lessonID+"/student");
-
-    }
 }
 
